@@ -1,11 +1,12 @@
-# Adding dependencies:
+# Run test
 
-zig fetch --save=sokol git+https://github.com/floooh/sokol-zig.git
+```
+./run.sh
+```
 
-# Desktop run
+or
 
+```
 zig build run --release=fast
-
-# Web run 
-
-zig build run -Dtarget=wasm32-emscripten
+node main.js
+```
