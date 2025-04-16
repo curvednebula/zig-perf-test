@@ -1,4 +1,3 @@
-#!/bin/sh
 set -e
-zig build run --release=fast
-node main.js
+zig build-exe src/main.zig -target wasm32-freestanding -fno-entry -O ReleaseFast --export=entrypoint --export=onFrame
+serve .

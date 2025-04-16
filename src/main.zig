@@ -1,40 +1,24 @@
-const std = @import("std");
+const Point = struct { x: f32, y: f32, rotation: f32 };
 
-const num_objects = 100_000;
-const num_repeats = 100_000;
+extern fn pixiInitApp() void;
+extern fn pixiInitSprites(ptr: [*]const u8, len: usize) void;
+extern fn pixiSetRotation(idx: u32, rotation: f32) void;
 
-const Point = struct {
-    x: f64,
-    y: f64,
-};
+const NUM_SPRITES = 20_000;
+var objects: [NUM_SPRITES]Point = undefined;
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
+export fn onFrame(deltaTime: f32) void {
+    for (0..NUM_SPRITES) |idx| {
+        const obj = &objects[idx];
+        obj.rotation += 0.003 * deltaTime;
+        pixiSetRotation(idx, obj.rotation);
+    }
+}
 
-    const start_creation = std.time.milliTimestamp();
-
-    var objects = try allocator.alloc(Point, num_objects);
-
-    for (0..objects.len) |i| {
-        objects[i] = Point{ .x = 0, .y = 0 };
+export fn entrypoint(_: u32) void {
+    for (0..NUM_SPRITES) |idx| {
+        objects[idx] = Point{ .x = 0, .y = 0, .rotation = 0 };
     }
 
-    const creation_time_ms = (std.time.milliTimestamp() - start_creation);
-    const start_update = std.time.milliTimestamp();
-
-    for (0..num_repeats) |_| {
-        for (0..objects.len) |i| {
-            var obj = &objects[i];
-            obj.x = @floatFromInt(i * 5);
-            obj.y = @floatFromInt(i * 5);
-        }
-    }
-
-    const update_time_ms = (std.time.milliTimestamp() - start_update);
-    std.debug.print("Zig finished creation {}ms, update {}ms\n", .{ creation_time_ms, update_time_ms });
-
-    // Cleanup
-    // for (objects) |obj| allocator.destroy(obj);
-    allocator.free(objects);
+    pixiInitApp();
 }
