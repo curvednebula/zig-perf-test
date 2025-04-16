@@ -1,5 +1,5 @@
 const numObjects = 100_000;
-const numRepeats = 10_000;
+const numRepeats = 100_000;
 
 function main() {
     let start = Date.now();
