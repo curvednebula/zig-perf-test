@@ -1,5 +1,3 @@
-
-
 const numObjects = 100_000;
 const numRepeats = 10_000;
 
