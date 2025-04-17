@@ -1,3 +1,5 @@
+import { Application, Assets, Sprite } from './pixi.min.mjs';
+
 const decoder = new TextDecoder();
 
 const NUM_SPRITES = 20_000;
@@ -6,15 +8,14 @@ const APP_HEIGHT = window.innerHeight;
 
 let wasmInstance;
 let pixiApp;
-
-const sprites = new Array(NUM_SPRITES);
+let sprites;
 
 function htmlById(id) {
     return document.getElementById(id);
 }
 
-async function pixiInitApp() {
-    pixiApp = new PIXI.Application();
+async function pixiInitApp(numSprites) {
+    pixiApp = new Application();
     await pixiApp.init({ 
         preference: 'webgpu',
         background: '#1099bb', 
@@ -24,10 +25,12 @@ async function pixiInitApp() {
     });
     document.body.appendChild(pixiApp.canvas);
 
-    const texture = await PIXI.Assets.load("https://pixijs.io/examples/examples/assets/bunny.png");
+    const texture = await Assets.load("https://pixijs.io/examples/examples/assets/bunny.png");
 
-    for (let i = 0; i < NUM_SPRITES; i++) {
-        const sprite = new PIXI.Sprite({
+    sprites = new Array(numSprites);
+
+    for (let i = 0; i < numSprites; i++) {
+        const sprite = new Sprite({
             texture,
             anchor: 0.5,
             x: Math.random() * APP_WIDTH,
@@ -72,16 +75,20 @@ function pixiSetRotation(idx, rotation) {
     }
 }
 
-fetch('main.wasm')
-    .then(res => res.arrayBuffer())
-    .then(bytes => WebAssembly.instantiate(bytes, {
-        env: {
-            pixiInitApp,
-            pixiInitSprites,
-            pixiSetRotation
-        }
-    }))
-    .then(obj => {
-        wasmInstance = obj.instance;
-        wasmInstance.exports.entrypoint();
-    });
+function main() {
+    fetch('main.wasm')
+        .then(res => res.arrayBuffer())
+        .then(bytes => WebAssembly.instantiate(bytes, {
+            env: {
+                pixiInitApp,
+                pixiInitSprites,
+                pixiSetRotation
+            }
+        }))
+        .then(obj => {
+            wasmInstance = obj.instance;
+            wasmInstance.exports.entrypoint();
+        });
+}
+
+main();
