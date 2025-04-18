@@ -1,10 +1,10 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
-    nativeBuild(b);
+    normalBuild(b);
 }
 
-pub fn nativeBuild(b: *std.Build) void {
+pub fn normalBuild(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
@@ -21,17 +21,17 @@ pub fn nativeBuild(b: *std.Build) void {
     b.step("run", "run main").dependOn(&run.step);
 }
 
-pub fn webBuild(b: *std.Build) void {
-    const target = b.resolveTargetQuery(.{
-        .cpu_arch = .wasm32,
-        .os_tag = .freestanding,
-    });
+// pub fn webBuild(b: *std.Build) void {
+//     const target = b.resolveTargetQuery(.{
+//         .cpu_arch = .wasm32,
+//         .os_tag = .freestanding,
+//     });
 
-    const exe = b.addExecutable(.{
-        .name = "main",
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = .ReleaseFast,
-    });
-    b.installArtifact(exe);
-}
+//     const wasm = b.addExecutable(.{
+//         .name = "main",
+//         .root_source_file = b.path("src/main.zig"),
+//         .target = target,
+//         .optimize = .ReleaseFast,
+//     });
+//     b.installArtifact(wasm);
+// }

@@ -1,5 +1,6 @@
 const Point = struct { x: f32, y: f32, rotation: f32 };
 
+// JS functions
 extern fn pixiInitApp(numSprites: usize) void;
 extern fn pixiInitSprites(ptr: [*]const u8, len: usize) void;
 extern fn pixiSetRotation(idx: u32, rotation: f32) void;
