@@ -2,7 +2,6 @@ import { Application, Assets, Sprite } from './pixi.min.mjs';
 
 const decoder = new TextDecoder();
 
-const NUM_SPRITES = 20_000;
 const APP_WIDTH = window.innerWidth;
 const APP_HEIGHT = window.innerHeight;
 
@@ -46,7 +45,7 @@ async function pixiInitApp(numSprites) {
     let timeSum = 0.0;
 
     pixiApp.ticker.add((time) => {
-        wasmInstance.exports.onFrame(time.deltaMS);
+        wasmInstance.exports.onFrame(time.deltaTime);
 
         numFrames++;
         timeSum += time.deltaMS;
@@ -54,7 +53,7 @@ async function pixiInitApp(numSprites) {
         if (numFrames >= 60) {
             const fpsLabel = htmlById('fps');
             if (fpsLabel) {
-                fpsLabel.textContent = `fps ${Math.round(60000/timeSum)}, num ${NUM_SPRITES}`;
+                fpsLabel.textContent = `fps ${Math.round(60000/timeSum)}, sprites ${numSprites}`;
             }
             numFrames = 0;
             timeSum = 0.0;
@@ -68,9 +67,11 @@ async function pixiInitSprites(ptr, len) {
     console.log("pixiGetTexture:", str);
 }
 
-function pixiSetRotation(idx, rotation) {
+function pixiSetTransform(idx, x, y, rotation) {
     const sprite = sprites[idx];
     if (sprite) {
+        sprite.x = x;
+        sprite.y = y;
         sprite.rotation = rotation;
     }
 }
@@ -82,12 +83,13 @@ function main() {
             env: {
                 pixiInitApp,
                 pixiInitSprites,
-                pixiSetRotation
+                pixiSetTransform
             }
         }))
         .then(obj => {
             wasmInstance = obj.instance;
             wasmInstance.exports.entrypoint();
+            wasmInstance.exports.onResize(APP_WIDTH, APP_HEIGHT);
         });
 }
 
