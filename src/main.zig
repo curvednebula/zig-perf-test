@@ -1,18 +1,19 @@
 const std = @import("std");
 const math = std.math;
+const mem = @import("std").heap.wasm_allocator;
 
-const Point = struct { x: f32, y: f32, velx: f32, vely: f32, rotation: f32 };
+const Actor = struct { x: f32, y: f32, velx: f32, vely: f32, rotation: f32 };
 
 // JS functions
 extern fn pixiInitApp(numSprites: usize) void;
 extern fn pixiInitSprites(ptr: [*]const u8, len: usize) void;
 extern fn pixiSetTransform(idx: u32, x: f32, y: f32, rotation: f32) void;
 
-const NUM_SPRITES = 5_000;
+const NUM_SPRITES: u32 = 50_000;
 var appWidth: f32 = 0.0;
 var appHeight: f32 = 0.0;
 
-var objects: [NUM_SPRITES]Point = undefined;
+var actors: []Actor = &[_]Actor{};
 
 export fn onResize(width: f32, height: f32) void {
     appWidth = width;
@@ -21,16 +22,10 @@ export fn onResize(width: f32, height: f32) void {
 
 export fn onFrame(dt: f32) void {
     for (0..NUM_SPRITES) |i| {
-        const obj = &objects[i];
+        const obj = &actors[i];
         obj.x += obj.velx * dt;
         obj.y += obj.vely * dt;
         obj.rotation += 0.03 * dt;
-
-        for (0..NUM_SPRITES) |j| {
-            const other = &objects[j];
-            obj.x += other.velx * dt;
-            obj.y += other.vely * dt;
-        }
 
         pixiSetTransform(i, obj.x, obj.y, obj.rotation);
 
@@ -56,8 +51,10 @@ export fn entrypoint() void {
     var prng = std.Random.DefaultPrng.init(0);
     const rand = prng.random();
 
+    actors = mem.alloc(Actor, NUM_SPRITES) catch return;
+
     for (0..NUM_SPRITES) |idx| {
-        objects[idx] = Point{ .x = 0, .y = 0, .velx = rand.float(f32) * 4 - 2, .vely = rand.float(f32) * 4 - 2, .rotation = rand.float(f32) * math.pi * 2 };
+        actors[idx] = Actor{ .x = 0, .y = 0, .velx = rand.float(f32) * 4 - 2, .vely = rand.float(f32) * 4 - 2, .rotation = rand.float(f32) * math.pi * 2 };
     }
 
     pixiInitApp(NUM_SPRITES);
