@@ -1,6 +1,6 @@
 # Description
 
-This repo shows how to compile Zig to WASM and bind it to PixiJS library.
+This repo shows how to use PixiJS library from Zig in WASM.
 
 # Installation
 
