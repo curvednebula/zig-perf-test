@@ -9,10 +9,9 @@ extern fn pixiInitApp(numSprites: usize) void;
 extern fn pixiInitSprites(ptr: [*]const u8, len: usize) void;
 extern fn pixiSetTransform(idx: u32, x: f32, y: f32, rotation: f32) void;
 
-const NUM_SPRITES: u32 = 50_000;
+var numSprites: u32 = 0;
 var appWidth: f32 = 0.0;
 var appHeight: f32 = 0.0;
-
 var actors: []Actor = &[_]Actor{};
 
 export fn onResize(width: f32, height: f32) void {
@@ -21,7 +20,7 @@ export fn onResize(width: f32, height: f32) void {
 }
 
 export fn onFrame(dt: f32) void {
-    for (0..NUM_SPRITES) |i| {
+    for (0..numSprites) |i| {
         const obj = &actors[i];
         obj.x += obj.velx * dt;
         obj.y += obj.vely * dt;
@@ -47,15 +46,17 @@ export fn onFrame(dt: f32) void {
     }
 }
 
-export fn entrypoint() void {
+export fn entrypoint(numSpr: u32) void {
     var prng = std.Random.DefaultPrng.init(0);
     const rand = prng.random();
 
-    actors = mem.alloc(Actor, NUM_SPRITES) catch return;
+    numSprites = numSpr;
 
-    for (0..NUM_SPRITES) |idx| {
+    actors = mem.alloc(Actor, numSprites) catch return;
+
+    for (0..numSprites) |idx| {
         actors[idx] = Actor{ .x = 0, .y = 0, .velx = rand.float(f32) * 4 - 2, .vely = rand.float(f32) * 4 - 2, .rotation = rand.float(f32) * math.pi * 2 };
     }
 
-    pixiInitApp(NUM_SPRITES);
+    pixiInitApp(numSprites);
 }

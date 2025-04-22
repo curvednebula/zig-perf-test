@@ -88,7 +88,8 @@ function main() {
         }))
         .then(obj => {
             wasmInstance = obj.instance;
-            wasmInstance.exports.entrypoint();
+            const params = new URLSearchParams(window.location.search);
+            wasmInstance.exports.entrypoint(parseInt(params.get('sprites') ?? '10000'));
             wasmInstance.exports.onResize(APP_WIDTH, APP_HEIGHT);
         });
 }
