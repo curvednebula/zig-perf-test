@@ -14,6 +14,4 @@ npm install -g serve
 ./run.sh
 ```
 
-To change number of sprites:
-
-http://localhost:3000/?sprites=50000
+To change number of sprites: http://localhost:3000/?sprites=50000
